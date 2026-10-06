@@ -24,13 +24,21 @@ export function ScriptPanel() {
   const chunks = useMemo(() => (brand ? chunksFor(project, brand) : []), [project.script, brand])
   const timing = useMemo(() => (brand ? timingFor(project, brand) : []), [project, brand])
   const time = useStore((st) => st.time)
+  const tapping = useStore((st) => st.tapping)
+  const nextTap = (() => {
+    let i = 0
+    while (project.tokenTimes[i] != null) i++
+    return i
+  })()
+  const tapped = project.tokenTimes.filter((v) => v != null).length
+  const total = chunks.reduce((n, c) => n + c.tokens.length, 0)
 
   return (
     <aside className="scriptpanel">
       <section>
         <div className="section-head">
           <h3>Script</h3>
-          <button className="btn small ghost" onClick={s.loadDemoScript} title="Fill in the approved Younes v1 script and timings">
+          <button className="btn small ghost" onClick={s.loadDemo} title="Load the approved Younes v1 reel: script, timings, products, zooms, card, pills, sparkles, logo and end card">
             Load v1 demo
           </button>
         </div>
@@ -49,8 +57,9 @@ export function ScriptPanel() {
       <section className="chunks">
         <div className="section-head">
           <h3>Screens ({chunks.length})</h3>
-          {project.chunkTimes.length > 0 && (
-            <button className="btn small ghost" onClick={s.clearChunkTimes} title="Make every time automatic again">
+          {total > 0 && <span className="dim small">{tapped}/{total} words tapped</span>}
+          {(project.chunkTimes.length > 0 || tapped > 0) && (
+            <button className="btn small ghost" onClick={s.clearTimes} title="Make every time automatic again">
               Reset times
             </button>
           )}
@@ -70,7 +79,7 @@ export function ScriptPanel() {
               </div>
               <div className="chunk-tokens" dir={c.rtl ? 'rtl' : 'ltr'}>
                 {c.tokens.map((t) => (
-                  <span key={t.index} className={`tok ${t.keyword ? 'kw' : ''}`}>{t.text}</span>
+                  <span key={t.index} className={`tok ${t.keyword ? 'kw' : ''} ${project.tokenTimes[t.index] != null ? 'tapped' : ''} ${tapping && t.index === nextTap ? 'next' : ''}`}>{t.text}</span>
                 ))}
               </div>
             </div>

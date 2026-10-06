@@ -1,0 +1,378 @@
+{
+  "version": 2,
+  "name": "Younes_Cadeaux_",
+  "brandId": "redjem",
+  "video": {
+    "path": "Younes_Cadeaux_.mp4",
+    "duration": 28.2,
+    "width": 1080,
+    "height": 1920,
+    "fps": 30,
+    "codec": "h264",
+    "hasAudio": true
+  },
+  "previewPath": null,
+  "inPoint": 0,
+  "outPoint": 25.2,
+  "script": "سلعة من طرف لطرف\nحاب تبان في *la foire* تاعك\nتبان *qualité* مليحة\n*les sacs* *les dépliants*\n*les cartes visite* *les stylos*\nوعفايس بزاف وحد أخرين\nعندك حتى *les agendas*\nوعندك *conception* ولا ما عندكش؟\nما تحيرش روحك\n*l'équipe infographie* تاعنا راهم في الخدمة\nيخدمولك *la conception*\nما شاء الله\nتبريزونتي فيها المنتجات تاعك\nولا الخدمات تاعك *بأحسن* *صورة*\nمرحبا بكم خاوتي\nعند *Redjem Studio*\n*meilleure qualité*\n*meilleur prix*",
+  "chunkTimes": [
+    {
+      "start": 0.4,
+      "end": 2.05
+    },
+    {
+      "start": 2.15,
+      "end": 3.45
+    },
+    {
+      "start": 3.5,
+      "end": 4.54
+    },
+    {
+      "start": 4.87,
+      "end": 6.1
+    },
+    {
+      "start": 6.31,
+      "end": 8.14
+    },
+    {
+      "start": 8.3,
+      "end": 9.4
+    },
+    {
+      "start": 9.56,
+      "end": 10.85
+    },
+    {
+      "start": 11.05,
+      "end": 12.23
+    },
+    {
+      "start": 12.36,
+      "end": 13.2
+    },
+    {
+      "start": 13.29,
+      "end": 14.56
+    },
+    {
+      "start": 14.7,
+      "end": 15.2
+    },
+    {
+      "start": 15.43,
+      "end": 16.34
+    },
+    {
+      "start": 16.63,
+      "end": 18.13
+    },
+    {
+      "start": 18.22,
+      "end": 19.61
+    },
+    {
+      "start": 19.96,
+      "end": 20.8
+    },
+    {
+      "start": 20.87,
+      "end": 22.15
+    },
+    {
+      "start": 22.25,
+      "end": 23.15
+    },
+    {
+      "start": 23.2,
+      "end": 24.1
+    }
+  ],
+  "tokenTimes": [],
+  "captions": {
+    "preset": "pop",
+    "centerY": null
+  },
+  "events": [
+    {
+      "id": "v1_0",
+      "type": "product",
+      "product": "products-11.png",
+      "width": 380,
+      "start": 0.25,
+      "end": 1.8,
+      "x": 200,
+      "y": 1010,
+      "side": -1,
+      "rotation": -8
+    },
+    {
+      "id": "v1_1",
+      "type": "product",
+      "product": "products-13.png",
+      "width": 300,
+      "start": 0.4,
+      "end": 1.8,
+      "x": 880,
+      "y": 960,
+      "side": 1,
+      "rotation": 6
+    },
+    {
+      "id": "v1_2",
+      "type": "product",
+      "product": "products-13.png",
+      "width": 320,
+      "start": 4.87,
+      "end": 6.2,
+      "x": 880,
+      "y": 990,
+      "side": 1,
+      "rotation": 5
+    },
+    {
+      "id": "v1_3",
+      "type": "product",
+      "product": "products-14.png",
+      "width": 340,
+      "start": 6.31,
+      "end": 7.45,
+      "x": 200,
+      "y": 1000,
+      "side": -1,
+      "rotation": -6
+    },
+    {
+      "id": "v1_4",
+      "type": "product",
+      "product": "products-15.png",
+      "width": 380,
+      "start": 7.36,
+      "end": 8.4,
+      "x": 870,
+      "y": 1000,
+      "side": 1,
+      "rotation": 4
+    },
+    {
+      "id": "v1_5",
+      "type": "product",
+      "product": "products-16.png",
+      "width": 360,
+      "start": 8.3,
+      "end": 9.5,
+      "x": 210,
+      "y": 980,
+      "side": -1,
+      "rotation": -5
+    },
+    {
+      "id": "v1_6",
+      "type": "product",
+      "product": "products-17.png",
+      "width": 360,
+      "start": 8.45,
+      "end": 9.5,
+      "x": 870,
+      "y": 1060,
+      "side": 1,
+      "rotation": 5
+    },
+    {
+      "id": "v1_7",
+      "type": "product",
+      "product": "products-11.png",
+      "width": 420,
+      "start": 9.56,
+      "end": 10.95,
+      "x": 215,
+      "y": 1010,
+      "side": -1,
+      "rotation": -7
+    },
+    {
+      "id": "v1_8",
+      "type": "product",
+      "product": "products-12.png",
+      "width": 400,
+      "start": 9.7,
+      "end": 10.95,
+      "x": 865,
+      "y": 990,
+      "side": 1,
+      "rotation": 7
+    },
+    {
+      "id": "v1_9",
+      "type": "zoomPunch",
+      "start": 4.5,
+      "end": 4.95,
+      "amount": 1.07,
+      "centerY": 820
+    },
+    {
+      "id": "v1_10",
+      "type": "zoomPunch",
+      "start": 11,
+      "end": 11.4,
+      "amount": 1.05,
+      "centerY": 820
+    },
+    {
+      "id": "v1_11",
+      "type": "zoomPunch",
+      "start": 20.85,
+      "end": 21.25,
+      "amount": 1.05,
+      "centerY": 820
+    },
+    {
+      "id": "v1_12",
+      "type": "zoomHold",
+      "start": 9.5,
+      "end": 10.95,
+      "amount": 1.1,
+      "centerY": 820,
+      "ramp": 0.25
+    },
+    {
+      "id": "v1_13",
+      "type": "card",
+      "start": 13.25,
+      "end": 15.3,
+      "x": 540,
+      "y": 880,
+      "products": [
+        "products-11.png",
+        "products-14.png",
+        "products-16.png"
+      ],
+      "label": "CONCEPTION"
+    },
+    {
+      "id": "v1_14",
+      "type": "pill",
+      "start": 16.7,
+      "end": 19.62,
+      "x": 330,
+      "y": 860,
+      "text": "Advertising"
+    },
+    {
+      "id": "v1_15",
+      "type": "pill",
+      "start": 17.25,
+      "end": 19.62,
+      "x": 760,
+      "y": 860,
+      "text": "Photography"
+    },
+    {
+      "id": "v1_16",
+      "type": "pill",
+      "start": 18.1,
+      "end": 19.62,
+      "x": 330,
+      "y": 975,
+      "text": "Interior Design"
+    },
+    {
+      "id": "v1_17",
+      "type": "pill",
+      "start": 18.65,
+      "end": 19.62,
+      "x": 750,
+      "y": 975,
+      "text": "Web Development"
+    },
+    {
+      "id": "v1_18",
+      "type": "sparkles",
+      "start": 15.45,
+      "end": 16.3,
+      "seed": 26,
+      "count": 7
+    },
+    {
+      "id": "v1_19",
+      "type": "sparkles",
+      "start": 18.95,
+      "end": 19.6,
+      "seed": 27,
+      "count": 7
+    },
+    {
+      "id": "v1_20",
+      "type": "sparkles",
+      "start": 22.25,
+      "end": 24.05,
+      "seed": 28,
+      "count": 7
+    },
+    {
+      "id": "v1_21",
+      "type": "logoCard",
+      "start": 20.87,
+      "end": 24,
+      "x": 520,
+      "y": 390,
+      "width": 250
+    }
+  ],
+  "endCard": {
+    "enabled": true,
+    "start": 24.1,
+    "hold": 2.1,
+    "products": [
+      {
+        "product": "products-15.png",
+        "width": 300,
+        "x": 190,
+        "y": 1660,
+        "side": -1,
+        "rotation": -10,
+        "delay": 0.55
+      },
+      {
+        "product": "products-13.png",
+        "width": 230,
+        "x": 900,
+        "y": 1640,
+        "side": 1,
+        "rotation": 8,
+        "delay": 0.7
+      },
+      {
+        "product": "products-16.png",
+        "width": 300,
+        "x": 880,
+        "y": 330,
+        "side": 1,
+        "rotation": 8,
+        "delay": 0.85
+      },
+      {
+        "product": "products-11.png",
+        "width": 260,
+        "x": 170,
+        "y": 360,
+        "side": -1,
+        "rotation": -8,
+        "delay": 1
+      }
+    ]
+  },
+  "watermark": {
+    "enabled": true,
+    "y": 330,
+    "opacity": 0.9
+  },
+  "sfx": {
+    "enabled": true,
+    "popVolume": 1,
+    "whooshVolume": 1,
+    "popFile": null,
+    "whooshFile": null
+  }
+}

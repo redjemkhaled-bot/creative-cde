@@ -39,17 +39,20 @@ describe('layout', () => {
     expect(l.lines.map((x) => x.tokens)).toEqual([[0, 1], [2, 3]])
     expect(l.scale).toBe(1)
   })
-  it('scales down when even two lines do not fit', () => {
-    const l = layoutChunk([1200, 1200], 20, 960)
-    expect(l.scale).toBeCloseTo(0.8)
+  it('picks the split with the narrowest widest line (render.py)', () => {
+    expect(layoutChunk([500, 100, 100, 400], 26, 960).lines.map((x) => x.tokens)).toEqual([[0, 1], [2, 3]])
+  })
+  it('only scales down when a line would leave the frame', () => {
+    expect(layoutChunk([1000], 26, 960).scale).toBe(1)
+    expect(layoutChunk([1200, 1200], 20, 960).scale).toBeCloseTo(1040 / 1200)
   })
   it('places RTL lines with the first token on the right', () => {
     const ltr = placeLine([100, 200], 20, 540, false)
     const rtl = placeLine([100, 200], 20, 540, true)
     expect(ltr[0]).toBeLessThan(ltr[1])
     expect(rtl[0]).toBeGreaterThan(rtl[1])
-    // Same total extent either way.
-    expect(Math.min(...rtl)).toBeCloseTo(ltr[0])
+    // Mirror images of each other around the centre.
+    expect(rtl[0]).toBeCloseTo(1080 - ltr[0])
   })
 })
 
@@ -57,12 +60,13 @@ describe('timing', () => {
   it('spreads unknown values by weight between known neighbours', () => {
     expect(fillProportional([0, null, null, 10], [1, 1, 2, 1], 0, 99)).toEqual([0, 2.5, 5, 10])
   })
-  it('uses chunk start/end and spreads tokens by character length', () => {
-    const chunks = parseScript('aa bbbb cc')
+  it('spreads words over 90% of the chunk by max(2, length), like render.py', () => {
+    const chunks = parseScript('a bbbb cc')
     const [c] = resolveTiming(chunks, [{ start: 1, end: 3 }], [], 0, 10)
     expect(c.start).toBe(1)
     expect(c.end).toBe(3)
-    expect(c.tokens.map((t) => +t.start.toFixed(3))).toEqual([1, 1.5, 2.5])
+    // weights 2, 4, 2 over 1.8 s
+    expect(c.tokens.map((t) => +t.start.toFixed(3))).toEqual([1, 1.45, 2.35])
   })
   it('lets tapped token times win and ends the last chunk 0.6 s after its last word', () => {
     const chunks = parseScript('a b\nc d')

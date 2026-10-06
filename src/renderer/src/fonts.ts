@@ -1,5 +1,6 @@
 import { clearLayoutCache } from '@core/captions'
 import { fontFamily, type FontRole } from '@core/fonts'
+import { clearSprites } from '@core/sprites'
 import type { LoadedBrand } from '@core/types'
 import { mediaUrl } from './media'
 
@@ -15,7 +16,7 @@ export async function loadBrandFonts(lb: LoadedBrand): Promise<void> {
       const family = fontFamily(lb.brand, role)
       const key = `${family}|${lb.dir}|${spec.file}`
       if (loaded.has(key)) return
-      // Variable fonts (Cairo) cover a weight range; static ones get any weight.
+      // Variable fonts (Cairo) cover a weight range; static ones serve any weight.
       const face = new FontFace(family, `url("${mediaUrl(`${lb.dir}/${spec.file}`)}")`, { weight: '1 1000' })
       try {
         document.fonts.add(await face.load())
@@ -26,4 +27,5 @@ export async function loadBrandFonts(lb: LoadedBrand): Promise<void> {
     })
   )
   clearLayoutCache()
+  clearSprites()
 }

@@ -1,21 +1,53 @@
 {
   "id": "redjem",
   "name": "Redjem Studio",
-  "colors": { "navy": "#112335", "mint": "#87C9B7", "gold": "#F2C83F", "white": "#FFFFFF" },
+  "colors": {
+    "navy": "#112335",
+    "mint": "#87C9B7",
+    "gold": "#F2C83F",
+    "white": "#FFFFFF"
+  },
   "fonts": {
-    "latin":  { "file": "fonts/Poppins-ExtraBold.ttf", "size": 70 },
-    "latin2": { "file": "fonts/Poppins-SemiBold.ttf" },
-    "arabic": { "file": "fonts/Cairo-VariableFont.ttf", "weight": 900, "size": 84 }
+    "latin": {
+      "file": "fonts/Poppins-ExtraBold.ttf",
+      "size": 70
+    },
+    "latin2": {
+      "file": "fonts/Poppins-SemiBold.ttf"
+    },
+    "arabic": {
+      "file": "fonts/Cairo-VariableFont.ttf",
+      "weight": 900,
+      "size": 84
+    }
   },
   "caption": {
-    "fill": "white", "keyword": "gold", "stroke": "navy", "strokeWidth": 4,
-    "keywordScale": 1.12, "uppercaseLatin": true, "centerY": 1330, "maxWidth": 960
+    "fill": "white",
+    "keyword": "gold",
+    "stroke": "navy",
+    "strokeWidth": 4,
+    "keywordScale": 1.12,
+    "uppercaseLatin": true,
+    "centerY": 1330,
+    "maxWidth": 960,
+    "lineHeight": 118,
+    "wordGap": 26
   },
-  "logo": { "svg": "logo_vertical.svg" },
+  "logo": {
+    "svg": "logo_vertical.svg"
+  },
   "pattern": "pattern.png",
   "handle": "@Redjem_Studio",
   "phone": "0558 51 21 02",
   "website": "www.redjemstudio.com",
-  "endCard": { "taglineTop": "MEILLEURE QUALITÉ", "taglineBottom": "MEILLEUR PRIX" },
-  "services": ["Advertising", "Photography", "Interior Design", "Web Development"]
+  "endCard": {
+    "taglineTop": "MEILLEURE QUALITÉ",
+    "taglineBottom": "MEILLEUR PRIX"
+  },
+  "services": [
+    "Advertising",
+    "Photography",
+    "Interior Design",
+    "Web Development"
+  ]
 }

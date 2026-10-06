@@ -1,18 +1,19 @@
-// Caption layer: word-by-word animated captions (Pop / Fade / Karaoke).
+// Caption layer — port of render_token / layout_chunk / draw_captions in
+// reference/render.py, with three presets: Pop (v1), Fade and Karaoke.
 
-import type { Ctx2D } from './drawFrame'
 import { clamp01, easeOutBack, easeOutCubic } from './easing'
 import { color, fontFamily, fontWeight } from './fonts'
 import { layoutChunk, placeLine } from './layout'
 import { parseScript, type Chunk, type Token } from './markup'
+import { ctx2d, drawBlurred, makeCanvas, memo, paste, type Ctx2D, type Sprite } from './sprites'
 import { resolveTiming, type TimedChunk } from './timing'
-import { OUT_W, type Brand, type Project } from './types'
+import { OUT_W, reelEnd, type Brand, type Project } from './types'
 
 export const POP_IN = 0.2
 export const FADE_OUT = 0.12
-
-interface PlacedToken { token: Token; x: number; baseline: number; width: number; size: number; font: string }
-interface PlacedChunk { chunk: Chunk; tokens: PlacedToken[]; scale: number }
+/** Captions stay up this long after the chunk's end, unless the next starts. */
+export const LINGER = 0.35
+const PAD = 40
 
 // --- memoised derivations (pure functions of their inputs) -----------------
 
@@ -39,102 +40,92 @@ export function timingFor(project: Project, brand: Brand): TimedChunk[] {
   return timed
 }
 
-const layoutCache = new Map<string, PlacedChunk>()
-/** Call after fonts finish loading: cached measurements are stale. */
-export const clearLayoutCache = (): void => layoutCache.clear()
+/** When chunk i stops being fully visible (it then fades for FADE_OUT). */
+export function hideTime(timing: TimedChunk[], i: number, project: Project): number {
+  const next = i + 1 < timing.length ? timing[i + 1].start : project.endCard.enabled ? project.endCard.start : reelEnd(project) + 1
+  return Math.min(next - 0.02, timing[i].end + LINGER)
+}
 
-function tokenFont(brand: Brand, t: Token): { font: string; size: number } {
+// --- token sprites -------------------------------------------------------------
+
+export function tokenFont(brand: Brand, t: Token): { font: string; size: number } {
   const role = t.arabic ? 'arabic' : 'latin'
   const base = brand.fonts[role].size ?? (t.arabic ? 84 : 70)
-  const size = base * (t.keyword ? brand.caption.keywordScale : 1)
-  return { size, font: `${fontWeight(brand, role)} ${size.toFixed(2)}px "${fontFamily(brand, role)}"` }
+  const size = Math.floor(base * (t.keyword ? brand.caption.keywordScale : 1))
+  return { size, font: `${fontWeight(brand, role)} ${size}px "${fontFamily(brand, role)}"` }
 }
 
-function placeChunk(ctx: Ctx2D, chunk: Chunk, brand: Brand, centerY: number): PlacedChunk {
-  const key = `${brand.id}|${centerY}|${chunk.tokens.map((t) => (t.keyword ? '*' : '') + t.text).join(' ')}`
+/** Text + navy stroke + soft shadow (+ gold glow for keywords). */
+function tokenSprite(brand: Brand, t: Token, gold: boolean, version: number): Sprite & { inkW: number } {
+  const key = `tok|${brand.id}|${version}|${t.text}|${t.keyword}|${t.arabic}|${gold}`
+  return memo(key, () => {
+    const { font } = tokenFont(brand, t)
+    const sw = brand.caption.strokeWidth
+    const probe = ctx2d(makeCanvas(4, 4))
+    probe.font = font
+    probe.direction = t.arabic ? 'rtl' : 'ltr'
+    probe.textAlign = 'left'
+    const m = probe.measureText(t.text)
+    const inkW = Math.ceil(m.actualBoundingBoxLeft + m.actualBoundingBoxRight) + 2 * sw
+    const inkH = Math.ceil(m.actualBoundingBoxAscent + m.actualBoundingBoxDescent) + 2 * sw
+    const w = inkW + 2 * PAD
+    const h = inkH + 2 * PAD
+
+    const base = makeCanvas(w, h)
+    const b = ctx2d(base)
+    b.font = font
+    b.direction = t.arabic ? 'rtl' : 'ltr'
+    b.textAlign = 'left'
+    b.textBaseline = 'alphabetic'
+    b.lineJoin = 'round'
+    b.miterLimit = 2
+    const x = PAD + sw + m.actualBoundingBoxLeft
+    const y = PAD + sw + m.actualBoundingBoxAscent
+    b.lineWidth = sw * 2
+    b.strokeStyle = color(brand, brand.caption.stroke)
+    b.strokeText(t.text, x, y)
+    b.fillStyle = color(brand, gold ? brand.caption.keyword : brand.caption.fill)
+    b.fillText(t.text, x, y)
+
+    const out = makeCanvas(w, h)
+    const o = ctx2d(out)
+    drawBlurred(o, base, '#000', 14, 0.85, 0, 6)
+    if (gold) drawBlurred(o, base, color(brand, brand.caption.keyword), 18, 0.55, 0, 0)
+    o.drawImage(base, 0, 0)
+    return Object.assign({ canvas: out, cx: w / 2, cy: h / 2 }, { inkW })
+  }) as Sprite & { inkW: number }
+}
+
+interface Placed { token: Token; cx: number; cy: number }
+
+const layoutCache = new Map<string, { placed: Placed[]; scale: number }>()
+let fontVersion = 0
+/** Call after fonts finish loading: cached measurements are stale. */
+export const clearLayoutCache = (): void => {
+  layoutCache.clear()
+  fontVersion++
+}
+
+function placeChunk(chunk: Chunk, brand: Brand, centerY: number) {
+  const key = `${brand.id}|${fontVersion}|${centerY}|${chunk.tokens.map((t) => (t.keyword ? '*' : '') + t.text).join(' ')}`
   const hit = layoutCache.get(key)
   if (hit) return hit
-  const c = brand.caption
-  const latinSize = brand.fonts.latin.size ?? 70
-  const arabicSize = brand.fonts.arabic.size ?? 84
-  const gap = c.wordGap ?? Math.round(latinSize * 0.3)
-  const lineH = c.lineHeight ?? Math.round(Math.max(latinSize, arabicSize) * 1.22)
-
-  const fonts = chunk.tokens.map((t) => tokenFont(brand, t))
-  const widths = chunk.tokens.map((t, i) => {
-    ctx.font = fonts[i].font
-    ctx.direction = t.arabic ? 'rtl' : 'ltr'
-    return ctx.measureText(t.text).width
-  })
-  ctx.direction = 'ltr'
-  const layout = layoutChunk(widths, gap, c.maxWidth)
+  const gap = brand.caption.wordGap ?? 26
+  const lh = brand.caption.lineHeight ?? 118
+  const widths = chunk.tokens.map((t) => tokenSprite(brand, t, t.keyword, fontVersion).inkW)
+  const layout = layoutChunk(widths, gap, brand.caption.maxWidth)
   const s = layout.scale
-  const placed: PlacedToken[] = []
+  const y0 = centerY - ((layout.lines.length - 1) * lh * s) / 2
+  const placed: Placed[] = []
   layout.lines.forEach((line, li) => {
-    const lineCenter = centerY + (li - (layout.lines.length - 1) / 2) * lineH * s
-    // Baseline sits a bit below the line centre so Latin caps look centred.
-    const baseline = lineCenter + latinSize * 0.36 * s
-    const ws = line.tokens.map((k) => widths[k] * s)
-    const xs = placeLine(ws, gap * s, OUT_W / 2, chunk.rtl)
-    line.tokens.forEach((k, j) => {
-      placed.push({ token: chunk.tokens[k], x: xs[j], baseline, width: ws[j], size: fonts[k].size * s, font: fonts[k].font })
-    })
+    const xs = placeLine(line.tokens.map((k) => widths[k] * s), gap * s, OUT_W / 2, chunk.rtl)
+    line.tokens.forEach((k, j) => placed.push({ token: chunk.tokens[k], cx: xs[j], cy: y0 + li * lh * s }))
   })
-  const result = { chunk, tokens: placed, scale: s }
+  // Keep logical order so placed[k] matches chunk.tokens[k].
+  placed.sort((a, b) => a.token.index - b.token.index)
+  const result = { placed, scale: s }
   layoutCache.set(key, result)
   return result
-}
-
-// --- drawing -----------------------------------------------------------------
-
-function drawToken(ctx: Ctx2D, brand: Brand, p: PlacedToken, scale: number, dy: number, alpha: number, gold: boolean) {
-  if (alpha <= 0.001) return
-  const c = brand.caption
-  const cx = p.x + p.width / 2
-  const cy = p.baseline - p.size * 0.36
-  ctx.save()
-  ctx.globalAlpha = alpha
-  ctx.translate(cx, cy + dy)
-  ctx.scale(scale, scale)
-  ctx.translate(-cx, -cy)
-  ctx.font = p.font
-  if (p.token.arabic) ctx.direction = 'rtl'
-  ctx.textAlign = p.token.arabic ? 'right' : 'left'
-  const x = p.token.arabic ? p.x + p.width : p.x
-  ctx.textBaseline = 'alphabetic'
-  ctx.lineJoin = 'round'
-  ctx.miterLimit = 2
-  const fill = color(brand, gold ? c.keyword : c.fill)
-
-  // Soft drop shadow under the stroked text.
-  ctx.shadowColor = 'rgba(0,0,0,0.85)'
-  ctx.shadowBlur = 14
-  ctx.shadowOffsetY = 6
-  ctx.lineWidth = c.strokeWidth * 2
-  ctx.strokeStyle = color(brand, c.stroke)
-  ctx.strokeText(p.token.text, x, p.baseline)
-  // Keyword glow.
-  if (gold) {
-    ctx.shadowColor = hexA(color(brand, c.keyword), 0.55)
-    ctx.shadowBlur = 18
-    ctx.shadowOffsetY = 0
-    ctx.fillStyle = fill
-    ctx.fillText(p.token.text, x, p.baseline)
-  }
-  ctx.shadowColor = 'transparent'
-  ctx.shadowBlur = 0
-  ctx.shadowOffsetY = 0
-  ctx.strokeText(p.token.text, x, p.baseline)
-  ctx.fillStyle = fill
-  ctx.fillText(p.token.text, x, p.baseline)
-  ctx.restore()
-}
-
-function hexA(hex: string, a: number): string {
-  const m = /^#?([0-9a-f]{6})$/i.exec(hex)
-  if (!m) return hex
-  const n = parseInt(m[1], 16)
-  return `rgba(${n >> 16},${(n >> 8) & 255},${n & 255},${a})`
 }
 
 export function drawCaptions(ctx: Ctx2D, t: number, project: Project, brand: Brand): void {
@@ -143,28 +134,29 @@ export function drawCaptions(ctx: Ctx2D, t: number, project: Project, brand: Bra
   const timing = timingFor(project, brand)
   const centerY = project.captions.centerY ?? brand.caption.centerY
   const preset = project.captions.preset
-  for (const tc of timing) {
-    if (t < tc.start || t >= tc.end) continue
-    const placed = placeChunk(ctx, chunks[tc.index], brand, centerY)
-    const chunkAlpha = clamp01((tc.end - t) / FADE_OUT)
-    placed.tokens.forEach((p, k) => {
+  timing.forEach((tc, i) => {
+    const hide = hideTime(timing, i, project)
+    if (t < tc.start - 0.05 || t >= hide + FADE_OUT) return
+    const fade = t < hide ? 1 : clamp01(1 - (t - hide) / FADE_OUT)
+    const { placed, scale } = placeChunk(chunks[tc.index], brand, centerY)
+    placed.forEach((p, k) => {
       const ts = tc.tokens[k].start
-      const next = k + 1 < tc.tokens.length ? tc.tokens[k + 1].start : tc.end
       const dt = t - ts
       if (preset === 'karaoke') {
+        const next = k + 1 < tc.tokens.length ? tc.tokens[k + 1].start : hide
         const current = dt >= 0 && t < next
-        drawToken(ctx, brand, p, 1, 0, chunkAlpha, p.token.keyword || current)
+        paste(ctx, tokenSprite(brand, p.token, p.token.keyword || current, fontVersion), p.cx, p.cy, scale, fade)
         return
       }
       if (dt < 0) return
-      const x = dt / POP_IN
+      const q = clamp01(dt / POP_IN)
+      const sprite = tokenSprite(brand, p.token, p.token.keyword, fontVersion)
       if (preset === 'fade') {
-        drawToken(ctx, brand, p, 1, 12 * (1 - easeOutCubic(x)), clamp01(x) * chunkAlpha, p.token.keyword)
+        paste(ctx, sprite, p.cx, p.cy + (1 - easeOutCubic(q)) * 12, scale, q * fade)
         return
       }
-      const scale = 0.55 + 0.45 * easeOutBack(x)
-      const dy = 25 * (1 - easeOutCubic(x))
-      drawToken(ctx, brand, p, scale, dy, clamp01(x * 3) * chunkAlpha, p.token.keyword)
+      const s = 0.55 + 0.45 * easeOutBack(q)
+      paste(ctx, sprite, p.cx, p.cy + (1 - easeOutCubic(q)) * 25, s * scale, clamp01(q * 3) * fade)
     })
-  }
+  })
 }

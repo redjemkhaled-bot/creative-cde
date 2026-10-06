@@ -12,7 +12,10 @@ export interface TimedChunk { index: number; start: number; end: number; tokens:
 /** After the last token of the last chunk, keep it on screen this long. */
 export const LAST_HOLD = 0.6
 
-const weight = (s: string): number => Math.max(1, [...s].length)
+/** Word weight for automatic spreading (render.py: max(2, len(token))). */
+const weight = (s: string): number => Math.max(2, [...s].length)
+/** Automatic word times use the first 90% of the chunk (render.py). */
+export const WORD_SPAN = 0.9
 
 /**
  * Fill unknown values in `known` by spreading them between their known
@@ -73,7 +76,7 @@ export function resolveTiming(
           : Math.max(hi, start + 1))
     // 2. Token starts inside the chunk.
     const known = c.tokens.map((t, k) => (k === 0 ? start : tokenTimes[t.index] ?? null))
-    const times = fillProportional(known, c.tokens.map((t) => weight(t.text)), start, end)
+    const times = fillProportional(known, c.tokens.map((t) => weight(t.text)), start, start + (end - start) * WORD_SPAN)
     return {
       index: i,
       start,
