@@ -19,6 +19,8 @@ export function Preview({ onUnsupported }: Props) {
   const previewPath = useStore((s) => s.project.previewPath)
   const playing = useStore((s) => s.playing)
   const time = useStore((s) => s.time)
+  const project = useStore((s) => s.project)
+  const fontsVersion = useStore((s) => s.fontsVersion)
 
   const draw = () => {
     const v = videoRef.current
@@ -69,6 +71,11 @@ export function Preview({ onUnsupported }: Props) {
     else draw()
   }, [time, playing])
 
+  // Script, timing, style or font changes: redraw the current frame.
+  useEffect(() => {
+    if (!playing) draw()
+  }, [project, fontsVersion])
+
   useEffect(() => {
     const ro = new ResizeObserver(() => draw())
     if (canvasRef.current) ro.observe(canvasRef.current)
@@ -82,6 +89,7 @@ export function Preview({ onUnsupported }: Props) {
         ref={videoRef}
         src={previewPath ? mediaUrl(previewPath) : undefined}
         preload="auto"
+        crossOrigin="anonymous"
         playsInline
         style={{ display: 'none' }}
         onSeeked={draw}

@@ -3,7 +3,7 @@ import type { DeadTail, LoadedBrand, VideoInfo } from '@core/types'
 
 const api = {
   pickVideo: (): Promise<string | null> => ipcRenderer.invoke('video:pick'),
-  initialVideo: (): Promise<{ path: string; time: number; play: boolean } | null> => ipcRenderer.invoke('video:initial'),
+  initialVideo: (): Promise<{ path: string; time: number; play: boolean; demo: boolean } | null> => ipcRenderer.invoke('video:initial'),
   probe: (path: string): Promise<VideoInfo> => ipcRenderer.invoke('video:probe', path),
   deadTail: (info: VideoInfo): Promise<DeadTail> => ipcRenderer.invoke('video:deadTail', info),
   makeProxy: (info: VideoInfo, onProgress: (p: number) => void): Promise<string> => {

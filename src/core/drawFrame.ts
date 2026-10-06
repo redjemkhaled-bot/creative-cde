@@ -2,6 +2,7 @@
 // It must stay pure and deterministic: same (t, project, brand, assets) ->
 // same pixels. Later phases add caption and event layers here.
 
+import { drawCaptions } from './captions'
 import { OUT_H, OUT_W, type Brand, type Project } from './types'
 
 export interface FrameAssets {
@@ -21,7 +22,7 @@ export function coverRect(sw: number, sh: number, dw = OUT_W, dh = OUT_H) {
   return { x: (dw - w) / 2, y: (dh - h) / 2, w, h }
 }
 
-export function drawFrame(ctx: Ctx2D, _t: number, _project: Project, _brand: Brand | null, assets: FrameAssets): void {
+export function drawFrame(ctx: Ctx2D, t: number, project: Project, brand: Brand | null, assets: FrameAssets): void {
   ctx.save()
   ctx.fillStyle = '#000'
   ctx.fillRect(0, 0, OUT_W, OUT_H)
@@ -31,4 +32,5 @@ export function drawFrame(ctx: Ctx2D, _t: number, _project: Project, _brand: Bra
     ctx.drawImage(assets.source, r.x, r.y, r.w, r.h)
   }
   ctx.restore()
+  if (brand) drawCaptions(ctx, t, project, brand)
 }

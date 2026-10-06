@@ -1,6 +1,12 @@
 import { formatTime } from '@core/time'
-import { OUT_FPS, OUT_H, OUT_W } from '@core/types'
-import { useStore } from '../store'
+import { OUT_FPS, OUT_H, OUT_W, type CaptionPreset } from '@core/types'
+import { activeBrand, useStore } from '../store'
+
+const PRESETS: { id: CaptionPreset; label: string }[] = [
+  { id: 'pop', label: 'Pop (word by word)' },
+  { id: 'fade', label: 'Fade (word by word)' },
+  { id: 'karaoke', label: 'Karaoke highlight' }
+]
 
 function TimeInput({ value, onChange }: { value: number; onChange: (t: number) => void }) {
   return (
@@ -17,7 +23,9 @@ function TimeInput({ value, onChange }: { value: number; onChange: (t: number) =
 
 export function Sidebar() {
   const { project, deadTail } = useStore()
+  const brand = useStore(activeBrand)?.brand
   const s = useStore.getState()
+  const centerY = project.captions.centerY ?? brand?.caption.centerY ?? 1330
   const v = project.video
   if (!v) return null
   const len = project.outPoint - project.inPoint
@@ -51,6 +59,31 @@ export function Sidebar() {
         ) : deadTail ? (
           <p className="note">No black or silent ending found.</p>
         ) : null}
+      </section>
+
+      <section>
+        <h3>Captions</h3>
+        <div className="field">
+          <label>Style</label>
+          <select className="select" value={project.captions.preset} onChange={(e) => s.setCaptions({ preset: e.target.value as CaptionPreset })}>
+            {PRESETS.map((p) => <option key={p.id} value={p.id}>{p.label}</option>)}
+          </select>
+        </div>
+        <div className="field">
+          <label>Height</label>
+          <span className="dim">{Math.round(centerY)} px</span>
+        </div>
+        <input
+          className="slider"
+          type="range"
+          min={300}
+          max={1750}
+          step={5}
+          value={centerY}
+          onChange={(e) => s.setCaptions({ centerY: e.target.valueAsNumber })}
+          onDoubleClick={() => s.setCaptions({ centerY: null })}
+          title="Double-click to reset to the brand default"
+        />
       </section>
 
       <section>

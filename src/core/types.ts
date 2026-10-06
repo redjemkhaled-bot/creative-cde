@@ -17,6 +17,7 @@ export interface Brand {
   colors: Record<string, string>
   fonts: { latin: FontSpec; latin2?: FontSpec; arabic: FontSpec }
   caption: {
+    /** Colour names refer to brand.colors; anything else is used as-is. */
     fill: string
     keyword: string
     stroke: string
@@ -25,6 +26,10 @@ export interface Brand {
     uppercaseLatin: boolean
     centerY: number
     maxWidth: number
+    /** Optional: distance between the two lines, px. */
+    lineHeight?: number
+    /** Optional: space between words, px. */
+    wordGap?: number
   }
   logo: { svg: string }
   pattern: string
@@ -59,6 +64,14 @@ export interface DeadTail {
   silenceStart: number | null
 }
 
+export type CaptionPreset = 'pop' | 'fade' | 'karaoke'
+
+export interface CaptionSettings {
+  preset: CaptionPreset
+  /** Overrides brand.caption.centerY when set. */
+  centerY: number | null
+}
+
 export interface Project {
   version: 1
   name: string
@@ -68,8 +81,18 @@ export interface Project {
   previewPath: string | null
   inPoint: number
   outPoint: number
+  /** Raw script with markup (*keyword*, |, line breaks). */
+  script: string
+  /** Per chunk (by position): optional start/end in source seconds. */
+  chunkTimes: { start: number | null; end: number | null }[]
+  /** Per token (by global index): tapped start time in source seconds. */
+  tokenTimes: (number | null)[]
+  captions: CaptionSettings
 }
 
 export function newProject(brandId: string): Project {
-  return { version: 1, name: 'Untitled', brandId, video: null, previewPath: null, inPoint: 0, outPoint: 0 }
+  return {
+    version: 1, name: 'Untitled', brandId, video: null, previewPath: null, inPoint: 0, outPoint: 0,
+    script: '', chunkTimes: [], tokenTimes: [], captions: { preset: 'pop', centerY: null }
+  }
 }

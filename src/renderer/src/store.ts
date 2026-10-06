@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import { clamp, snapToFrame } from '@core/time'
-import { newProject, type DeadTail, type LoadedBrand, type Project, type VideoInfo } from '@core/types'
+import { V1_CHUNK_TIMES, V1_SCRIPT } from '@core/demo'
+import { newProject, type CaptionSettings, type DeadTail, type LoadedBrand, type Project, type VideoInfo } from '@core/types'
 
 export type Status = { kind: 'idle' } | { kind: 'busy'; label: string; progress?: number } | { kind: 'error'; message: string }
 
@@ -21,6 +22,14 @@ interface State {
   setInPoint: (t: number) => void
   setOutPoint: (t: number) => void
   setPreviewPath: (p: string) => void
+  /** Bumped when fonts finish loading so the preview redraws. */
+  fontsVersion: number
+  fontsLoaded: () => void
+  setScript: (script: string) => void
+  setChunkTime: (chunk: number, field: 'start' | 'end', value: number | null) => void
+  clearChunkTimes: () => void
+  setCaptions: (c: Partial<CaptionSettings>) => void
+  loadDemoScript: () => void
 }
 
 const MIN_LEN = 0.5
@@ -58,7 +67,33 @@ export const useStore = create<State>((set, get) => ({
     const max = p.video?.duration ?? 0
     set({ project: { ...p, outPoint: clamp(snapToFrame(t), p.inPoint + MIN_LEN, max) } })
   },
-  setPreviewPath: (previewPath) => set({ project: { ...get().project, previewPath } })
+  setPreviewPath: (previewPath) => set({ project: { ...get().project, previewPath } }),
+  fontsVersion: 0,
+  fontsLoaded: () => set({ fontsVersion: get().fontsVersion + 1 }),
+  setScript: (script) => set({ project: { ...get().project, script } }),
+  setChunkTime: (chunk, field, value) => {
+    const p = get().project
+    const chunkTimes = p.chunkTimes.slice()
+    while (chunkTimes.length <= chunk) chunkTimes.push({ start: null, end: null })
+    chunkTimes[chunk] = { ...chunkTimes[chunk], [field]: value }
+    set({ project: { ...p, chunkTimes } })
+  },
+  clearChunkTimes: () => set({ project: { ...get().project, chunkTimes: [], tokenTimes: [] } }),
+  setCaptions: (c) => {
+    const p = get().project
+    set({ project: { ...p, captions: { ...p.captions, ...c } } })
+  },
+  loadDemoScript: () => {
+    const p = get().project
+    set({
+      project: {
+        ...p,
+        script: V1_SCRIPT,
+        chunkTimes: V1_CHUNK_TIMES.map(([start, end]) => ({ start, end })),
+        tokenTimes: []
+      }
+    })
+  }
 }))
 
 export const activeBrand = (s: State): LoadedBrand | null =>

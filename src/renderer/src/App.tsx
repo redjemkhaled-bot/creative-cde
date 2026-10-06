@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
+import { loadBrandFonts } from './fonts'
 import { Preview } from './components/Preview'
+import { ScriptPanel } from './components/ScriptPanel'
 import { Sidebar } from './components/Sidebar'
 import { Transport } from './components/Transport'
 import { activeBrand, useStore } from './store'
@@ -16,6 +18,11 @@ export function App() {
   const status = useStore((s) => s.status)
   const brand = useStore(activeBrand)
   const [dragOver, setDragOver] = useState(false)
+
+  // Fonts must be registered before captions are measured and drawn.
+  useEffect(() => {
+    if (brand) loadBrandFonts(brand).then(() => useStore.getState().fontsLoaded())
+  }, [brand])
 
   const makeProxy = useCallback(async () => {
     const s = useStore.getState()
@@ -57,6 +64,7 @@ export function App() {
     window.api.initialVideo().then(async (init) => {
       if (!init) return
       await openVideo(init.path)
+      if (init.demo) useStore.getState().loadDemoScript()
       useStore.getState().setTime(init.time)
       if (init.play) setTimeout(() => useStore.getState().setPlaying(true), 300)
       setTimeout(() => window.api.idle(), 500)
@@ -115,6 +123,7 @@ export function App() {
 
       {project.video ? (
         <main className="workspace">
+          <ScriptPanel />
           <div className="stage">
             <Preview onUnsupported={makeProxy} />
             <Transport />

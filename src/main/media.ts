@@ -30,11 +30,23 @@ export async function probe(path: string): Promise<VideoInfo> {
 }
 
 export async function detectDeadTail(info: VideoInfo): Promise<DeadTail> {
-  // Only scan the last 30 s: fast on long files, and a dead tail is at the end anyway.
-  const from = Math.max(0, info.duration - 30)
-  const args = ['-hide_banner', '-nostats', '-ss', String(from), '-i', info.path,
-    '-vf', 'blackdetect=d=0.3:pix_th=0.10', '-an', '-f', 'null', '-']
-  const black = await run(FFMPEG, args)
+  // Scan only the end of the file (fast on long videos). If the dead part
+  // reaches back to where the scan started, it began earlier: widen the
+  // window and scan again.
+  let window = 30
+  for (;;) {
+    const from = Math.max(0, info.duration - window)
+    const tail = await scanTail(info, from)
+    const starts = [tail.blackStart, tail.silenceStart].filter((v): v is number => v !== null)
+    const cutOff = from > 0 && starts.some((v) => v - from < 0.5)
+    if (!cutOff) return tail
+    window *= 3
+  }
+}
+
+async function scanTail(info: VideoInfo, from: number): Promise<DeadTail> {
+  const black = await run(FFMPEG, ['-hide_banner', '-nostats', '-ss', String(from), '-i', info.path,
+    '-vf', 'blackdetect=d=0.3:pix_th=0.10', '-an', '-f', 'null', '-'])
   let log = shift(black.stderr, from, /(black_start:|black_end:)\s*([\d.]+)/g)
   if (info.hasAudio) {
     const sil = await run(FFMPEG, ['-hide_banner', '-nostats', '-ss', String(from), '-i', info.path,

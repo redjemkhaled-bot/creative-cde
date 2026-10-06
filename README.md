@@ -23,14 +23,27 @@ Every push builds installers automatically:
 |---|---|---|
 | 0 | Setup, placeholder assets | ✅ |
 | 1 | Open video, preview, play/scrub, dead-tail detection, trim | ✅ |
-| 2 | Captions | next |
-| 3 | Tap-to-time + timeline | |
+| 2 | Captions: script markup, Arabic/French layout, Pop/Fade/Karaoke styles, auto timing | ✅ |
+| 3 | Tap-to-time + timeline | next |
 | 4 | Export MP4 | |
 | 5 | Events, end card, SFX, v1 acceptance test | |
 | 6 | Brands + wizard | |
 | 7 | SRT, ProRes overlay, presets | |
 
-## Keyboard (Phase 1)
+## Script markup
+
+| Write | Result |
+|---|---|
+| `*word*` or `*several words*` | Keyword: gold, bigger, glowing (one unit) |
+| new line or `\|` | New caption screen |
+| commas, periods | Hidden |
+| French / Latin words | Shown in CAPITALS (brand setting) |
+
+Each screen has optional start → end times. Leave them empty and the app
+spreads the captions automatically; **Load v1 demo** fills in the approved
+Younes script with its timings.
+
+## Keyboard
 
 | Key | Action |
 |---|---|

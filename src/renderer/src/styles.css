@@ -62,3 +62,24 @@ dd { margin: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; 
 .note { color: var(--dim); font-size: 12px; margin: 8px 0 0; }
 .callout { margin-top: 10px; padding: 10px; border-radius: 8px; background: rgba(242, 200, 63, .1); border: 1px solid rgba(242, 200, 63, .35); }
 .callout-actions { display: flex; gap: 6px; margin-top: 8px; }
+
+.scriptpanel { width: 360px; display: flex; flex-direction: column; background: var(--panel); border-right: 1px solid var(--line); min-height: 0; }
+.scriptpanel section { padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.scriptpanel h3 { margin: 0; font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: var(--dim); }
+.section-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+.script { width: 100%; height: 190px; resize: vertical; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px 10px; font: 14px/1.6 'Segoe UI', Tahoma, sans-serif; user-select: text; unicode-bidi: plaintext; }
+.script:focus, .num:focus, .select:focus { outline: 1px solid var(--accent); }
+code { background: var(--panel-2); padding: 0 4px; border-radius: 3px; color: var(--accent); }
+.chunks { flex: 1; overflow-y: auto; border-bottom: none !important; }
+.chunk { padding: 8px; border-radius: 8px; border: 1px solid transparent; cursor: pointer; margin-bottom: 4px; }
+.chunk:hover { background: var(--panel-2); }
+.chunk.active { border-color: var(--accent); background: rgba(242, 200, 63, .07); }
+.chunk-times { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; }
+.chunk-n { width: 20px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.num.tiny { width: 70px; padding: 2px 5px; font-size: 12px; }
+.num.auto::placeholder { color: #5d6470; font-style: italic; }
+.chunk-tokens { display: flex; flex-wrap: wrap; gap: 4px; }
+.tok { padding: 1px 7px; border-radius: 4px; background: var(--panel-2); font-size: 13px; }
+.tok.kw { background: rgba(242, 200, 63, .2); color: var(--accent); font-weight: 600; }
+.select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 5px; padding: 4px 6px; font: inherit; }
+.slider { width: 100%; accent-color: var(--accent); }

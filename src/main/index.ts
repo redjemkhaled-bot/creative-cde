@@ -40,7 +40,7 @@ ipcMain.handle('video:pick', async () => {
   })
   return r.canceled ? null : r.filePaths[0]
 })
-ipcMain.handle('video:initial', () => openArg && { path: openArg, time: Number(process.env.RC_TIME ?? 0), play: !!process.env.RC_PLAY })
+ipcMain.handle('video:initial', () => openArg && { path: openArg, time: Number(process.env.RC_TIME ?? 0), play: !!process.env.RC_PLAY, demo: !!process.env.RC_DEMO })
 ipcMain.handle('video:probe', (_e, path: string) => probe(path))
 ipcMain.handle('video:deadTail', (_e, info: VideoInfo) => detectDeadTail(info))
 ipcMain.handle('video:proxy', (e, info: VideoInfo) =>
@@ -56,6 +56,13 @@ ipcMain.on('app:idle', async () => {
   await new Promise((r) => setTimeout(r, process.env.RC_PLAY ? 2500 : 800))
   const img = await win.webContents.capturePage()
   writeFileSync(out, img.toPNG())
+  // RC_FRAME=frame.png also saves the full-size 1080x1920 preview canvas.
+  if (process.env.RC_FRAME) {
+    const url: string = await win.webContents.executeJavaScript(
+      "document.querySelector('.preview-canvas')?.toDataURL('image/png') ?? ''"
+    )
+    writeFileSync(process.env.RC_FRAME, Buffer.from(url.split(',')[1] ?? '', 'base64'))
+  }
   app.quit()
 })
 
