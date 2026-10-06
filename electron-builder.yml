@@ -1,0 +1,36 @@
+appId: com.redjemstudio.reelcaptioner
+productName: Reel Captioner
+directories:
+  output: dist
+  buildResources: build
+files:
+  - out/**
+  - package.json
+asarUnpack:
+  - node_modules/ffmpeg-static/**
+  - node_modules/ffprobe-static/**
+extraResources:
+  - from: brands
+    to: brands
+win:
+  target: nsis
+  files:
+    - "!node_modules/ffprobe-static/bin/{darwin,linux}/**"
+    - "!node_modules/ffprobe-static/bin/win32/ia32/**"
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  artifactName: Reel-Captioner-Setup-${version}.${ext}
+mac:
+  target:
+    - target: dmg
+      arch: arm64
+  identity: null
+  category: public.app-category.video
+  artifactName: Reel-Captioner-${version}-${arch}.${ext}
+  files:
+    - "!node_modules/ffprobe-static/bin/{win32,linux}/**"
+linux:
+  target: AppImage
+  files:
+    - "!node_modules/ffprobe-static/bin/{darwin,win32}/**"

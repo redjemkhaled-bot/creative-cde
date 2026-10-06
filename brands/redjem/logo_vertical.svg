@@ -1,0 +1,7 @@
+<!-- PLACEHOLDER logo: replace with the real Redjem Studio logo_vertical.svg -->
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="460" viewBox="0 0 400 460">
+  <rect x="80" y="20" width="240" height="240" rx="48" fill="#112335"/>
+  <text x="200" y="210" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="800" font-size="190" fill="#F2C83F">R</text>
+  <text x="200" y="340" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="800" font-size="64" fill="#112335">REDJEM</text>
+  <text x="200" y="410" text-anchor="middle" font-family="Poppins, Arial, sans-serif" font-weight="600" font-size="44" letter-spacing="10" fill="#87C9B7">STUDIO</text>
+</svg>
